@@ -1,0 +1,19 @@
+VERSION : "3"
+
+services:
+  fastapi:
+    build: .
+    ports: 
+      - "8000:8000"
+    depends_on:
+      - nginx
+    environment:
+      - NGINX=nginx
+      - NGINX_PORT=80
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes: 
+      - ./nginx.conf:/etc/nginx.conf:ro
