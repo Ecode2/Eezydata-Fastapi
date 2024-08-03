@@ -5,8 +5,6 @@ from dotenv import load_dotenv
 from paystack import DedicatedVirtualAccount
 
 
-ebills.username="Ecode2"
-ebills.password="Elias_code11"
 
 load_dotenv(override=True)
 
