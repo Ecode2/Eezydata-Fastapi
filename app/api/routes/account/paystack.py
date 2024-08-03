@@ -1,6 +1,7 @@
 """Bills Payment related endpoints."""
 import logging
-from fastapi import Depends, HTTPException, status, APIRouter
+from fastapi import Depends, HTTPException, Query, status, APIRouter
+from app.db.queries.paystack import get_wallet_info
 from app.schemas.auth import AuthUserPublic
 from ebills.models.verify import VerifyModel, VerifyResponse
 from ebills import Verify
@@ -15,7 +16,7 @@ logger = logging.getLogger(settings.PROJECT_SLUG)
 
 @paystack_router.get("/info",
                   dependencies=[Depends(http_auth)])
-async def Account_info(current_user: AuthUserPublic = Depends(get_current_active_user)):
+async def Account_info(username: str = Query(None), current_user: AuthUserPublic = Depends(get_current_active_user)):
     """Get paystack Account Information
 
     \f
@@ -27,8 +28,17 @@ async def Account_info(current_user: AuthUserPublic = Depends(get_current_active
     Returns:
     """
 
-    pass
-    #TODO: create a function that gets user balance from authUser table
+    if username != current_user.username:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="User is unauthorised to access this page.")
+
+    wallet_info = await  get_wallet_info(username=username)
+
+    if not wallet_info:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail="Couldnt get wallet info.")
+    
+    return wallet_info
 
 @paystack_router.get("/webhook")
 async def receive_webhook():
